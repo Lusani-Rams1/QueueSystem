@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueueCare - Admin Dashboard</title>
+    <!-- GOOGLE FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+
+    <!-- CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+    <div class="logo">
+
+        <h2>
+            QueueCare
+        </h2>
+
+    </div>
+
+    <div class="menu">
+
+        <a href="Admin.html" class="active">
+            Admin Dashboard
+        </a>
+
+        <a href="Analytics.html">
+            Analytics
+        </a>
+
+        <a href="Profile.html">
+            Profile
+        </a>
+
+    </div>
+
+</div>
+
+<div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+
+        <div>
+
+            <h1>
+                Admin Dashboard
+            </h1>
+
+            <p>
+                Clinic management and system overview
+            </p>
+
+        </div>
+
+        <div class="admin-profile">
+
+            <div>
+
+                <strong>
+                    Administrator
+                </strong>
+
+                <p>
+                    System Admin
+                </p>
+
+            </div>
+
+            <div class="profile-icon">
+                A
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                👥
+            </div>
+
+            <p>
+                Patients Today
+            </p>
+
+            <h2 id="patientsToday">
+                0
+            </h2>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ⏳
+            </div>
+
+            <p>
+                Waiting
+            </p>
+
+            <h2 id="waitingCount">
+                0
+            </h2>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ✓
+            </div>
+
+            <p>
+                Completed
+            </p>
+
+            <h2 id="completedCount">
+                0
+            </h2>
+
+        </div>
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ⚠
+            </div>
+
+            <p>
+                No Shows
+            </p>
+
+            <h2 id="noShowCount">
+                0
+            </h2>
+
+        </div>
+
+    </div>
+
+    <div class="content-grid">
+
+        <!-- LEFT -->
+        <div>
+
+            <!-- QUEUE -->
+            <div class="card">
+
+                <div class="card-title">
+
+                    <h3>
+                        Current Queue
+                    </h3>
+
+                    <span>
+                        Live
+                    </span>
+
+                </div>
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Queue
+                            </th>
+
+                            <th>
+                                Patient
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="queueTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- CHART -->
+            <div
+                class="card"
+                style="margin-top:25px;"
+            >
+
+                <div class="card-title">
+
+                    <h3>
+                        Patient Activity
+                    </h3>
+
+                    <span>
+                        Today
+                    </span>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <canvas
+                        id="patientChart"
+                    ></canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+
+            <!-- DOCTORS -->
+            <div class="card">
+
+                <div class="card-title">
+
+                    <h3>
+                        Doctors
+                    </h3>
+
+                    <span>
+                        Live status
+                    </span>
+
+                </div>
+
+                <div id="doctorList">
+
+                </div>
+
+            </div>
+
+            <!-- QUICK ACTIONS -->
+
+            <div
+                class="card"
+                style="margin-top:25px;"
+            >
+
+                <div class="card-title">
+
+                    <h3>
+                        Quick Actions
+                    </h3>
+
+                </div>
+
+                <div class="actions">
+
+                    <button
+                        class="action-btn blue"
+                        onclick="manageUsers()"
+                    >
+                        Users
+                    </button>
+
+                    <button
+                        class="action-btn green"
+                        onclick="manageDoctors()"
+                    >
+                        Doctors
+                    </button>
+
+                    <button
+                        class="action-btn orange"
+                        onclick="viewPatients()"
+                    >
+                        Patients
+                    </button>
+
+                    <button
+                        class="action-btn red"
+                        onclick="viewLogs()"
+                    >
+                        Activity Logs
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card activity">
+
+        <div class="card-title">
+
+            <h3>
+                Recent Activity
+            </h3>
+
+            <span>
+                System activity
+            </span>
+
+        </div>
+
+        <div id="activityList">
+
+            <div class="activity-item">
+
+                <div class="activity-dot"></div>
+
+                <div>
+
+                    <div class="activity-text">
+                        Loading activity...
+                    </div>
+
+                    <div class="activity-time">
+                        Please wait
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    API
+ 
+const API =
+    "http://localhost:5000";
+
+//LOAD STATISTICS 
+async function loadStats() {
+
+    try {
+
+        const response =
+            await fetch(`${API}/stats`);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Stats endpoint unavailable"
+            );
+
+        }
+
+        const stats =
+            await response.json();
+
+        document
+            .getElementById("patientsToday")
+            .textContent =
+                stats.total || 0;
+
+        document
+            .getElementById("waitingCount")
+            .textContent =
+                stats.waiting || 0;
+
+        document
+            .getElementById("completedCount")
+            .textContent =
+                stats.completed || 0;
+
+        document
+            .getElementById("noShowCount")
+            .textContent =
+                stats.no_show || 0;
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Stats error:",
+            error
+        );
+
+    }
+
+}
+
+//LOAD QUEUE 
+async function loadQueue() {
+
+    try {
+
+        const response =
+            await fetch(`${API}/patients`);
+
+        const patients =
+            await response.json();
+
+
+        const table =
+            document
+                .getElementById("queueTable");
+
+        table.innerHTML = "";
+
+        patients.forEach(patient => {
+
+            let statusClass =
+                "waiting";
+
+            if (
+                patient.status ===
+                "Completed"
+            ) {
+
+                statusClass =
+                    "completed";
+
+            }
+
+            table.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        Q${String(
+                            patient.queue_number
+                        ).padStart(3,"0")}
+                    </td>
+
+                    <td>
+                        ${patient.patient_name}
+                    </td>
+
+                    <td>
+
+                        <span
+                            class="status ${statusClass}"
+                        >
+
+                            ${patient.status}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        });
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Queue error:",
+            error
+        );
+
+    }
+
+}
+
+//LOAD DOCTORS 
+async function loadDoctors() {
+
+    const doctorList =
+        document
+            .getElementById("doctorList");
+
+    try {
+
+        const response =
+            await fetch(`${API}/doctors`);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Doctors endpoint unavailable"
+            );
+
+        }
+
+        const doctors =
+            await response.json();
+
+        doctorList.innerHTML = "";
+
+        doctors.forEach(doctor => {
+
+            let statusClass =
+                "available";
+
+            if (
+                doctor.status === "Busy"
+            ) {
+
+                statusClass =
+                    "busy";
+
+            }
+
+            if (
+                doctor.status === "Offline"
+            ) {
+
+                statusClass =
+                    "offline";
+
+            }
+
+            doctorList.innerHTML += `
+
+                <div class="doctor">
+
+                    <div class="doctor-info">
+
+                        <div
+                            class="doctor-avatar"
+                        >
+                            ${doctor.doctor_name
+                                .charAt(3)}
+                        </div>
+
+                        <div>
+
+                            <div
+                                class="doctor-name"
+                            >
+
+                                ${doctor.doctor_name}
+
+                            </div>
+
+                            <div
+                                class="doctor-role"
+                            >
+
+                                ${doctor.specialization || "Doctor"}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <span
+                        class="status ${statusClass}"
+                    >
+
+                        ${doctor.status}
+
+                    </span>
+
+                </div>
+
+            `;
+
+        });
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Doctor error:",
+            error
+        );
+
+        doctorList.innerHTML = `
+
+            <div
+                style="
+                    color:#9ca3af;
+                    font-size:13px;
+                    padding:10px 0;
+                "
+            >
+
+                Doctor data unavailable.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+//LOAD ACTIVITY 
+async function loadActivity() {
+
+    const list =
+        document
+            .getElementById("activityList");
+
+    try {
+
+        const response =
+            await fetch(`${API}/activity-logs`);
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Activity endpoint unavailable"
+            );
+
+        }
+
+        const activities =
+            await response.json();
+
+        list.innerHTML = "";
+
+        activities
+            .slice(0, 6)
+            .forEach(activity => {
+
+                list.innerHTML += `
+
+                    <div
+                        class="activity-item"
+                    >
+
+                        <div
+                            class="activity-dot"
+                        ></div>
+
+                        <div>
+
+                            <div
+                                class="activity-text"
+                            >
+
+                                ${activity.activity}
+
+                            </div>
+
+                            <div
+                                class="activity-time"
+                            >
+
+                                ${activity.log_time}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            });
+
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Activity error:",
+            error
+        );
+
+        list.innerHTML = `
+
+            <div
+                class="activity-item"
+            >
+
+                <div
+                    class="activity-dot"
+                ></div>
+
+                <div>
+
+                    <div
+                        class="activity-text"
+                    >
+                        No recent activity
+                    </div>
+
+                    <div
+                        class="activity-time"
+                    >
+                        Activity logs unavailable
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+    CHART 
+function createChart() {
+
+    const ctx =
+        document
+            .getElementById(
+                "patientChart"
+            );
+
+
+    new Chart(ctx, {
+
+        type: "line",
+
+        data: {
+
+            labels: [
+                "08:00",
+                "09:00",
+                "10:00",
+                "11:00",
+                "12:00",
+                "13:00",
+                "14:00"
+            ],
+
+            datasets: [{
+
+                label:
+                    "Patients",
+
+                data: [
+                    3,
+                    7,
+                    12,
+                    9,
+                    15,
+                    11,
+                    8
+                ],
+
+                tension: 0.4,
+
+                fill: true
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+
+                    labels: {
+
+                        color: "white"
+
+                    }
+
+                }
+
+            },
+
+            scales: {
+
+                x: {
+
+                    ticks: {
+
+                        color: "#9ca3af"
+
+                    },
+
+                    grid: {
+
+                        color:
+                            "rgba(255,255,255,0.05)"
+
+                    }
+
+                },
+
+                y: {
+
+                    ticks: {
+
+                        color: "#9ca3af"
+
+                    },
+
+                    grid: {
+
+                        color:
+                            "rgba(255,255,255,0.05)"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+}
+
+//QUICK ACTIONS
+function manageUsers() {
+
+    alert(
+        "User management will open here."
+    );
+
+}
+
+function manageDoctors() {
+
+    alert(
+        "Doctor management will open here."
+    );
+
+}
+
+function viewPatients() {
+
+    window.location.href =
+        "Reception.html";
+
+}
+
+function viewLogs() {
+
+    alert(
+        "Activity logs will open here."
+    );
+
+}
+
+//LOAD EVERYTHING 
+loadStats();
+
+loadQueue();
+
+loadDoctors();
+
+loadActivity();
+
+createChart();
+
+//AUTO REFRESH
+setInterval(() => {
+
+    loadStats();
+
+    loadQueue();
+
+    loadDoctors();
+
+    loadActivity();
+
+}, 5000);
+
+const user =
+    JSON.parse(
+        localStorage.getItem(
+            "queuecareUser"
+        )
+    );
+
+if (!user || user.role !== "admin") {
+
+    window.location.href =
+        "Login.html";
+
+}
+
+</script>
+
+</body>
+</html>

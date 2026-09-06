@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinic Queue Display</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+    <div class="menu">
+        <a href="Reception.html">Reception</a>
+        <a href="Doctor.html">Doctor</a>
+        <a href="Display.html" class="active">Display</a>
+        <a href="Analytics.html">Analytics</a>
+    </div>
+
+</div>
+
+<!-- DISPLAY -->
+<div class="display-container">
+
+    <!-- HEADER -->
+    <div class="display-header">
+        <h1>MEDICAL CLINIC</h1>
+        <p>Queue Display System</p>
+    </div>
+
+    <!-- CURRENT -->
+    <div class="current-patient">
+
+        <div>NOW SERVING</div>
+
+        <div class="queue-number" id="currentQueue">---</div>
+
+        <div class="patient-name" id="currentPatientName">---</div>
+
+    </div>
+
+    <!-- QUEUE -->
+    <div class="queue-section">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Queue</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="queueTable"></tbody>
+
+        </table>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+
+        <div>Clinic Queue System</div>
+
+        <div class="clock" id="clock"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+// CLOCK
+function updateClock(){
+
+    const now = new Date();
+
+    document.getElementById("clock").innerText =
+        now.toLocaleString();
+
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+// CURRENT PATIENT
+async function loadCurrentPatient(){
+
+    try{
+
+        const res =
+            await fetch("http://localhost:5000/current-patient");
+
+        const patient =
+            await res.json();
+
+        if(!patient || !patient.queue_number){
+
+            document.getElementById("currentQueue").innerText = "---";
+            document.getElementById("currentPatientName").innerText = "---";
+            return;
+
+        }
+
+        document.getElementById("currentQueue").innerText =
+            "A" + String(patient.queue_number).padStart(3,"0");
+
+        document.getElementById("currentPatientName").innerText =
+            patient.patient_name || "---";
+
+    }
+    catch(err){
+
+        console.log(err);
+
+    }
+
+}
+
+// QUEUE LIST
+async function loadQueue(){
+
+    const table =
+        document.getElementById("queueTable");
+
+    try{
+
+        const res =
+            await fetch("http://localhost:5000/upcoming-patients");
+
+        const patients =
+            await res.json();
+
+        if(!Array.isArray(patients) || patients.length === 0){
+
+            table.innerHTML =
+                `<tr><td colspan="3">No patients waiting</td></tr>`;
+
+            return;
+
+        }
+
+        let rows = "";
+
+        patients.forEach(p => {
+
+            rows += `
+                <tr>
+
+                    <td>
+                        A${String(p.queue_number).padStart(3,"0")}
+                    </td>
+
+                    <td>
+                        ${p.patient_name || "---"}
+                    </td>
+
+                    <td>
+                        <span class="status waiting">
+                            ${p.status || "Waiting"}
+                        </span>
+                    </td>
+
+                </tr>
+            `;
+
+        });
+
+        table.innerHTML = rows;
+
+    }
+    catch(err){
+
+        console.log(err);
+
+        table.innerHTML =
+            `<tr><td colspan="3">Failed to load queue</td></tr>`;
+
+    }
+
+}
+
+// AUTO REFRESH
+loadCurrentPatient();
+loadQueue();
+
+setInterval(() => {
+
+    loadCurrentPatient();
+    loadQueue();
+
+}, 5000);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Minnie Help AI</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+<body>
+
+<div class="chat-container">
+
+    <!-- HEADER -->
+
+    <div class="chat-header">
+
+        <div class="bot-a  vatar">
+        
+        </div>
+
+        <div>
+            <h1>Minnie Help</h1>
+            <p>Clinic Queue Assistant</p>
+        </div>
+
+    </div>
+
+    <!-- CHAT -->
+    <div class="chat-box" id="chatBox">
+
+        <div class="message bot-message">
+            Hello 👋 I’m Minnie Help.<br>
+            Ask me about patients, doctors, appointments or queue display.
+        </div>
+
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+
+        <input
+            type="text"
+            id="input"
+            placeholder="Ask something..."
+        >
+
+        <button class="send-btn" onclick="sendMessage()">
+            Send
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+// ADD MESSAGE
+function addMessage(text, sender){
+
+    const chatBox =
+        document.getElementById("chatBox");
+
+    const message =
+        document.createElement("div");
+
+    message.classList.add("message");
+
+    if(sender === "user"){
+
+        message.classList.add("user-message");
+
+    }
+    else{
+
+        message.classList.add("bot-message");
+
+    }
+
+    message.innerHTML = text;
+
+    chatBox.appendChild(message);
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+}
+
+// AI RESPONSES
+function getReply(input){
+
+    input = input.toLowerCase();
+
+    // GREETING
+    if(
+        input.includes("hello") ||
+        input.includes("hi") ||
+        input.includes("hey")
+    ){
+
+        return `
+            Hello 👋<br>
+            How can I help you today?
+        `;
+
+    }
+
+     // PATIENTS
+    if(input.includes("patient")){
+
+        return `
+            Patients are managed from the Reception Dashboard.<br><br>
+
+            Features include:
+            <br>• Register patient
+            <br>• Queue assignment
+            <br>• Status tracking
+            <br>• Queue updates
+        `;
+
+    }
+
+     // DOCTOR
+    if(input.includes("doctor")){
+
+        return `
+            The Doctor Dashboard allows doctors to:
+            <br><br>
+
+            • Call next patient
+            <br>• Complete consultation
+            <br>• View upcoming patients
+            <br>• Update doctor status
+        `;
+
+    }
+
+     // DISPLAY
+    if(input.includes("display")){
+
+        return `
+            The Display Screen shows:
+            <br><br>
+
+            • Current patient
+            <br>• Waiting queue
+            <br>• Queue numbers
+            <br>• Live updates
+        `;
+
+    }
+
+     // APPOINTMENTS
+    if(input.includes("appointment")){
+
+        return `
+            Appointments are scheduled through Reception.
+            <br><br>
+
+            Reception staff can:
+            <br>• Register appointments
+            <br>• Assign queue numbers
+            <br>• Track patient status
+        `;
+
+    }
+
+    // ANALYTICS
+    if(input.includes("analytics")){
+
+        return `
+            Analytics Dashboard provides:
+            <br><br>
+
+            • Queue statistics
+            <br>• Patient counts
+            <br>• Status charts
+            <br>• Consultation insights
+        `;
+
+    }
+
+    // DEFAULT
+    return `
+        I can help with:
+        <br><br>
+
+        • Patients
+        <br>• Doctors
+        <br>• Queue display
+        <br>• Analytics
+        <br>• Appointments
+        <br>• Give me a tour
+    `;
+
+}
+
+// SEND MESSAGE
+function sendMessage(){
+
+    const input =
+        document.getElementById("input");
+
+    const text = input.value.trim();
+
+    if(!text) return;
+
+    // USER MESSAGE
+    addMessage(text, "user");
+
+    // BOT REPLY
+    setTimeout(() => {
+
+        const reply = getReply(text);
+
+        addMessage(reply, "bot");
+
+    }, 500);
+
+    input.value = "";
+
+}
+
+// ENTER KEY
+document.getElementById("input")
+.addEventListener("keypress", function(event){
+
+    if(event.key === "Enter"){
+
+        sendMessage();
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueueCare - Profile</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+
+<body>
+
+<div class="sidebar">
+
+    <div class="logo">
+
+        <h2>
+            QueueCare
+        </h2>
+
+    </div>
+
+    <div
+        class="menu"
+        id="menu"
+    ></div>
+
+</div>
+
+<div class="main">
+
+    <div class="topbar">
+
+        <div>
+
+            <h1>
+                My Profile
+            </h1>
+
+            <p>
+                Manage your QueueCare account
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="card profile-card">
+
+        <div class="profile-header">
+
+            <div class="profile-avatar">
+                A
+            </div>
+
+            <div>
+
+                <h2 id="profileName">
+                    Loading...
+                </h2>
+
+                <p id="profileRole">
+                    Loading...
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="profile-details">
+
+            <div class="detail">
+
+                <span>
+                    Full Name
+                </span>
+
+                <strong id="fullName">
+                    -
+                </strong>
+
+            </div>
+
+            <div class="detail">
+
+                <span>
+                    Email
+                </span>
+
+                <strong id="email">
+                    -
+                </strong>
+
+            </div>
+
+            <div class="detail">
+
+                <span>
+                    Phone
+                </span>
+
+                <strong id="phone">
+                    -
+                </strong>
+
+            </div>
+
+            <div class="detail">
+
+                <span>
+                    Role
+                </span>
+
+                <strong id="role">
+                    -
+                </strong>
+
+            </div>
+
+            <div class="detail">
+
+                <span>
+                    Account Status
+                </span>
+
+                <strong id="status">
+                    -
+                </strong>
+
+            </div>
+
+            <div class="detail">
+
+                <span>
+                    Account Created
+                </span>
+
+                <strong id="createdAt">
+                    -
+                </strong>
+
+            </div>
+
+        </div>
+
+        <button
+            class="btn btn-primary"
+            onclick="logout()"
+        >
+            Logout
+        </button>
+
+    </div>
+
+</div>
+<script>
+
+const API =
+    "http://localhost:5000";
+
+const token =
+    localStorage.getItem(
+        "queuecareToken"
+    );
+
+if (!token) {
+
+    window.location.href =
+        "Login.html";
+
+}
+
+// LOAD PROFILE
+async function loadProfile() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API}/profile`,
+                {
+
+                    headers: {
+
+                        "Authorization":
+                            `Bearer ${token}`
+
+                    }
+
+                }
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Session expired."
+            );
+
+        }
+
+        const user =
+            await response.json();
+
+        document
+            .getElementById("profileName")
+            .textContent =
+                user.full_name;
+
+        document
+            .getElementById("profileRole")
+            .textContent =
+                user.role.toUpperCase();
+
+        document
+            .getElementById("fullName")
+            .textContent =
+                user.full_name;
+
+        document
+            .getElementById("email")
+            .textContent =
+                user.email;
+
+        document
+            .getElementById("phone")
+            .textContent =
+                user.phone ||
+                "Not provided";
+
+        document
+            .getElementById("role")
+            .textContent =
+                user.role;
+
+        document
+            .getElementById("status")
+            .textContent =
+                user.status;
+
+        document
+            .getElementById("createdAt")
+            .textContent =
+                new Date(
+                    user.created_at
+                ).toLocaleDateString();
+
+        document
+            .querySelector(
+                ".profile-avatar"
+            )
+            .textContent =
+                user.full_name
+                    .charAt(0)
+                    .toUpperCase();
+
+        createMenu(
+            user.role
+        );
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+        localStorage.clear();
+
+        window.location.href =
+            "Login.html";
+
+    }
+
+}
+
+// ROLE-BASED MENU
+function createMenu(role) {
+
+    const menu =
+        document.getElementById(
+            "menu"
+        );
+
+    let links = [];
+
+    if (role === "admin") {
+
+        links = [
+
+            ["Admin", "Admin.html"],
+
+            ["Analytics", "Analytics.html"],
+
+            ["Profile", "Profile.html"]
+
+        ];
+
+    }
+
+    else if (role === "doctor") {
+
+        links = [
+
+            ["Doctor", "Doctor.html"],
+
+            ["Profile", "Profile.html"]
+
+        ];
+
+    }
+
+    else if (role === "reception") {
+
+        links = [
+
+            ["Reception", "Reception.html"],
+
+            ["Profile", "Profile.html"]
+
+        ];
+
+    }
+
+    links.forEach(
+        ([name, page]) => {
+
+            const a =
+                document.createElement(
+                    "a"
+                );
+
+            a.href = page;
+
+            a.textContent = name;
+
+            if (
+                page ===
+                "Profile.html"
+            ) {
+
+                a.classList.add(
+                    "active"
+                );
+
+            }
+
+            menu.appendChild(a);
+
+        }
+    );
+
+}
+
+// LOGOUT
+function logout() {
+
+    localStorage.removeItem(
+        "queuecareToken"
+    );
+
+    localStorage.removeItem(
+        "queuecareUser"
+    );
+
+    window.location.href =
+        "Login.html";
+
+}
+
+loadProfile();
+
+</script>
+
+</body>
+</html>

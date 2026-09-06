@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+
+    <h1>Analytics Dashboard</h1>
+ <div class="menu">
+
+        <a href="Admin.html">Admin Dashboard</a>
+        <a href="Analytics.html"class="active">Analytics</a>
+        <a href="Display.html">Display</a>
+        <a href="Profile.html">Profile</a>
+
+    </div>
+
+    <p>Clinic Queue Insights & Statistics</p>
+
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard">
+
+    <!-- PATIENT LIST -->
+    <div class="card">
+
+        <div class="card-title">
+            Patient Queue
+        </div>
+
+        <ul id="patientList" class="patient-list">
+
+        </ul>
+
+    </div>
+
+    <!-- CHART -->
+    <div class="card">
+
+        <div class="card-title">
+            Patient Status Overview
+        </div>
+
+        <div class="chart-container">
+
+            <canvas id="myChart"></canvas>
+
+        </div>
+
+    </div>
+
+    <!-- LIVE STATS -->
+    <div class="card">
+
+        <div class="card-title">
+            Queue Statistics
+        </div>
+
+        <div class="stats-grid">
+
+            <div class="stat-box">
+                <p>Waiting</p>
+                <h2 id="waitingCount">0</h2>
+            </div>
+
+            <div class="stat-box">
+                <p>Consultation</p>
+                <h2 id="consultingCount">0</h2>
+            </div>
+
+            <div class="stat-box">
+                <p>Completed</p>
+                <h2 id="completedCount">0</h2>
+            </div>
+
+            <div class="stat-box">
+                <p>Total Patients</p>
+                <h2 id="totalCount">0</h2>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+// LOAD PATIENTS
+async function loadPatients(){
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:5000/patients"
+        );
+
+        const patients = await response.json();
+
+        const list = document.getElementById("patientList");
+
+        list.innerHTML = "";
+
+        let waiting = 0;
+        let consultation = 0;
+        let completed = 0;
+
+        patients.forEach(patient => {
+
+            let statusClass = "waiting";
+
+            if(patient.status === "In Consultation"){
+
+                statusClass = "consulting";
+
+                consultation++;
+
+            }
+            else if(patient.status === "Completed"){
+
+                statusClass = "completed";
+
+                completed++;
+
+            }
+            else{
+
+                waiting++;
+
+            }
+
+            list.innerHTML += `
+                <li class="patient-item">
+
+                    <span>
+                        ${patient.patient_name}
+                    </span>
+
+                    <span class="patient-status ${statusClass}">
+                        ${patient.status}
+                    </span>
+
+                </li>
+            `;
+
+        });
+
+        // UPDATE STATS
+        document.getElementById("waitingCount").innerText =
+            waiting;
+
+        document.getElementById("consultingCount").innerText =
+            consultation;
+
+        document.getElementById("completedCount").innerText =
+            completed;
+
+        document.getElementById("totalCount").innerText =
+            patients.length;
+
+        // CREATE CHART
+        createChart(waiting, consultation, completed);
+
+    }
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+// CHART
+let chart;
+
+function createChart(waiting, consultation, completed){
+
+    const ctx = document.getElementById("myChart");
+
+    if(chart){
+
+        chart.destroy();
+
+    }
+
+    chart = new Chart(ctx, {
+
+        type: "doughnut",
+
+        data: {
+
+            labels: [
+                "Waiting",
+                "Consultation",
+                "Completed"
+            ],
+
+            datasets: [{
+
+                data: [
+                    waiting,
+                    consultation,
+                    completed
+                ],
+
+                backgroundColor: [
+                    "#f59e0b",
+                    "#10b981",
+                    "#2563eb"
+                ]
+
+            }]
+
+        },
+
+        options: {
+
+            responsive:true,
+
+            plugins:{
+                legend:{
+                    labels:{
+                        color:"white"
+                    }
+                }
+            }
+
+        }
+
+    });
+
+}
+
+// AUTO REFRESH
+loadPatients();
+
+setInterval(loadPatients,5000);
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Doctor</title>
+
+    <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+    <div class="logo">
+
+        <h2 style="color:white;">
+            QueueCare
+        </h2>
+
+    </div>
+
+    <div class="menu">
+        <a href="Doctor.html" class="active">Doctor Dashboard</a>
+        <a href="Display.html">Display</a>
+        <a href="Profile.html">Profile</a>
+    </div>
+
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+    <!-- HEADER -->
+    <div class="header">
+
+        <div>
+
+            <h1>
+                Doctor Dashboard
+            </h1>
+            <p>
+                Queue Management
+            </p>
+
+        </div>
+
+        <button
+            class="delay-btn"
+            onclick="addDelay()"
+        >
+            + Add Delay
+        </button>
+
+    </div>
+
+    <!-- CURRENT PATIENT -->
+    <div
+        class="card"
+        id="currentPatient"
+    >
+
+        <h2>
+            No patient in consultation
+        </h2>
+
+    </div>
+
+    <!-- CALL BUTTON -->
+    <button
+        class="call-btn"
+        onclick="callNextPatient()"
+    >
+
+        Call Next Patient
+
+    </button>
+
+    <!-- COMPLETE BUTTON -->
+    <button
+        class="complete-btn"
+        onclick="completePatient()"
+    >
+
+        Complete Patient
+
+    </button>
+
+    <!-- UPCOMING -->
+
+    <h3 class="section-title">
+        UPCOMING PATIENTS
+    </h3>
+
+    <div id="upcomingPatients"></div>
+
+</div>
+
+<script>
+
+/* CURRENT PATIENT ID */
+let currentPatientId = null;
+
+/* LOAD CURRENT PATIENT */
+async function loadCurrentPatient(){
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:5000/current-patient"
+        );
+
+        const patient =
+            await response.json();
+
+        const current =
+            document.getElementById(
+                "currentPatient"
+            );
+
+        if(!patient){
+
+            current.innerHTML = `
+
+                <h2>
+                    No patient in consultation
+                </h2>
+
+            `;
+
+            return;
+
+        }
+
+        currentPatientId = patient.id;
+
+        current.innerHTML = `
+
+            <h2>
+                ${patient.patient_name}
+            </h2>
+
+            <p>
+                Queue Number:
+                ${patient.queue_number}
+            </p>
+
+            <p>
+                Status:
+                ${patient.status}
+            </p>
+
+        `;
+
+    }
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+/* LOAD UPCOMING PATIENTS */
+async function loadUpcoming(){
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:5000/upcoming-patients"
+        );
+
+        const patients =
+            await response.json();
+
+        const upcoming =
+            document.getElementById(
+                "upcomingPatients"
+            );
+
+        upcoming.innerHTML = "";
+
+        if(patients.length === 0){
+
+            upcoming.innerHTML = `
+
+                <div class="upcoming-card">
+                    No patients waiting
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+        patients.forEach(patient => {
+
+            upcoming.innerHTML += `
+
+                <div class="upcoming-card">
+
+                    <strong>
+                        Queue ${patient.queue_number}
+                    </strong>
+
+                    <br>
+
+                    ${patient.patient_name}
+
+                </div>
+
+            `;
+
+        });
+
+    }
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+/* CALL NEXT PATIENT */
+async function callNextPatient(){
+
+    try{
+
+        const response = await fetch(
+
+            "http://localhost:5000/call-next",
+
+            {
+                method:"POST"
+            }
+
+        );
+
+        const data =
+            await response.json();
+
+        if(data.message){
+
+            alert(data.message);
+
+        }
+
+        loadCurrentPatient();
+
+        loadUpcoming();
+
+    }
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+/* COMPLETE PATIENT */
+async function completePatient(){
+
+    try{
+
+        const response = await fetch(
+
+            "http://localhost:5000/complete-patient",
+
+            {
+                method:"POST"
+            }
+
+        );
+
+        const data =
+            await response.json();
+
+        alert(data.message);
+
+        loadCurrentPatient();
+
+        loadUpcoming();
+
+    }
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+/* ADD DELAY */
+async function addDelay(){
+
+    try{
+
+        const response = await fetch(
+
+            "http://localhost:5000/add-delay",
+
+            {
+                method:"POST"
+            }
+
+        );
+
+        const data =
+            await response.json();
+
+        alert(data.message);
+
+        loadCurrentPatient();
+
+        loadUpcoming();
+
+    }
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+/* AUTO LOAD */
+loadCurrentPatient();
+
+loadUpcoming();
+
+setInterval(() => {
+
+    loadCurrentPatient();
+
+    loadUpcoming();
+
+}, 5000);
+
+const user =
+    JSON.parse(
+        localStorage.getItem(
+            "queuecareUser"
+        )
+    );
+
+
+if (!user || user.role !== "doctor") {
+
+    window.location.href =
+        "Login.html";
+
+}
+
+</script>
+
+</body>
+</html>

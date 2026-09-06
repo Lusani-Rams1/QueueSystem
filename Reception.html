@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QueueCare - Reception</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <div class="logo">
+
+        <h2>QueueCare</h2>
+
+    </div>
+
+    <div class="menu">
+
+        <a href="Reception.html" class="active">Reception</a>
+        <a href="Display.html">Display</a>
+        <a href="Profile.html">Profile</a>
+    </div>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+        <div>
+
+            <h1>Medical Clinic</h1>
+            <p>Reception Dashboard</p>
+
+        </div>
+
+        <div class="top-actions">
+
+            <button
+                onclick="loadPatients()"
+            >
+                Refresh
+            </button>
+
+            <button
+                onclick="openModal()"
+            >
+                + Register Patient
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- DASHBOARD -->
+
+    <div class="dashboard">
+
+        <!-- LEFT -->
+
+        <div class="card">
+
+            <h2>
+                Active Queue
+            </h2>
+
+            <table border="1" width="100%">
+                <thead>
+                    <tr>
+                        <th>Queue</th>
+                        <th>Name</th>
+                        <th>Registered</th>
+                        <th>Status</th>
+                        <th>Walk-in</th>
+                    </tr>
+                </thead>
+                <tbody id="queueTable"></tbody>
+            </table>
+        </div>
+
+        <!-- RIGHT -->
+
+        <div class="right-panel">
+
+            <!-- STATS -->
+
+            <div class="card">
+
+                <h2>
+                    Today's Stats
+                </h2>
+
+                <p>
+                    Waiting:
+                    <strong id="waitingCount">
+                        0
+                    </strong>
+                </p>
+
+                <p>
+                    Consultation:
+                    <strong id="consultationCount">
+                        0
+                    </strong>
+                </p>
+
+                <p>
+                    Completed:
+                    <strong id="completedCount">
+                        0
+                    </strong>
+                </p>
+
+                <p>
+                    No Show:
+                    <strong id="noShowCount">
+                        0
+                    </strong>
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL -->
+
+<div
+    class="modal"
+    id="patientModal"
+    style="display:none;"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <h2>
+                Register Patient
+            </h2>
+
+            <span
+                onclick="closeModal()"
+                style="cursor:pointer;"
+            >
+                X
+            </span>
+
+        </div>
+
+        <!-- FORM -->
+        <form id="patientForm">
+
+            <!-- PATIENT NAME -->
+            <div>
+                <label>
+                    Patient Name
+                </label>
+
+                <input
+                    type="text"
+                    id="patient_name"
+                    placeholder="Full Name"
+                    required
+                >
+            </div>
+
+            <br>
+
+            <!-- EMAIL -->
+            <div>
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Email"
+                    required
+                >
+            </div>
+
+            <br>
+
+            <!-- PHONE -->
+            <div>
+                <label>
+                    Phone
+                </label>
+
+                <input
+                    type="text"
+                    id="phone"
+                    placeholder="Phone Number"
+                    required
+                >
+            </div>
+
+            <br>
+
+            <!-- WALK IN -->
+            <div>
+                <label>
+                    Walk-in
+                </label>
+
+                <select
+                    id="walk_in"
+                    required
+                >
+                    <option value="No">
+                        No
+                    </option>
+
+                    <option value="Yes">
+                        Yes
+                    </option>
+
+                </select>
+            </div>
+
+            <br>
+
+            <!-- NOTES -->
+            <div>
+                <label>
+                    notes
+                </label>
+
+                <textarea
+                    id="notes"
+                    placeholder="Additional Notes..."
+                ></textarea>
+            </div>
+
+            <br>
+
+            <!-- BUTTON -->
+            <button type="submit">
+
+                Assign Ticket
+
+            </button>
+
+        </form>
+    </div>
+
+</div>
+
+<script>
+
+/* OPEN MODAL */
+function openModal(){
+
+    document.getElementById(
+        "patientModal"
+    ).style.display = "block";
+
+}
+
+/* CLOSE MODAL */
+function closeModal(){
+
+    document.getElementById(
+        "patientModal"
+    ).style.display = "none";
+
+}
+
+/* LOAD PATIENTS */
+async function loadPatients(){
+
+    try{
+
+        const response = await fetch(
+            "http://localhost:5000/patients"
+        );
+
+        const patients =
+            await response.json();
+
+        const table =
+            document.getElementById(
+                "queueTable"
+            );
+
+        table.innerHTML = "";
+
+        let waiting = 0;
+        let consultation = 0;
+        let completed = 0;
+        let noShow = 0;
+
+        patients.forEach(patient => {
+
+            if(
+                patient.status === "Waiting"
+            ){
+
+                waiting++;
+
+            }
+            else if(
+                patient.status ===
+                "In Consultation"
+            ){
+
+                consultation++;
+
+            }
+            else if(
+                patient.status ===
+                "Completed"
+            ){
+
+                completed++;
+
+            }
+            else if(
+                patient.status ===
+                "No Show"
+            ){
+
+                noShow++;
+
+            }
+
+            table.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        ${patient.queue_number}
+                    </td>
+
+                    <td>
+                        ${patient.patient_name}
+                    </td>
+
+                    <td>
+                        ${new Date(
+                            patient.registration_time
+                        ).toLocaleTimeString()}
+                    </td>
+
+                    <td>
+                        ${patient.status}
+                    </td>
+
+                    <td>
+                        ${patient.walk_in}
+                    </td>
+
+                </tr>
+
+            `;
+
+        });
+
+        /* UPDATE STATS */
+        document.getElementById(
+            "waitingCount"
+        ).innerText = waiting;
+
+        document.getElementById(
+            "consultationCount"
+        ).innerText = consultation;
+
+        document.getElementById(
+            "completedCount"
+        ).innerText = completed;
+
+        document.getElementById(
+            "noShowCount"
+        ).innerText = noShow;
+
+    }
+    catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+/* REGISTER PATIENT */
+document
+.getElementById(
+    "patientForm"
+)
+.addEventListener(
+    "submit",
+    async function(e){
+
+        e.preventDefault();
+
+        const patient = {
+
+            patient_name:
+                document.getElementById(
+                    "patient_name"
+                ).value,
+
+            email:
+                document.getElementById(
+                    "email"
+                ).value,
+
+            phone:
+                document.getElementById(
+                    "phone"
+                ).value,
+
+            walk_in:
+                document.getElementById(
+                    "walk_in"
+                ).value,
+
+            notes:
+                document.getElementById(
+                    "notes"
+                ).value
+
+        };
+
+        try{
+
+            const response =
+                await fetch(
+                    "http://localhost:5000/register-patient",
+                    {
+
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                            "application/json"
+                        },
+
+                        body:JSON.stringify(
+                            patient
+                        )
+
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if(data.success){
+
+                alert(
+                    `Patient Registered!
+Queue Number: ${data.queue_number}`
+                );
+
+                document
+                .getElementById(
+                    "patientForm"
+                )
+                .reset();
+
+                closeModal();
+
+                loadPatients();
+
+            }
+            else{
+
+                alert(
+                    "Failed to register patient"
+                );
+
+            }
+
+        }
+        catch(error){
+
+            console.log(error);
+
+        }
+
+    }
+);
+
+/* AUTO LOAD */
+loadPatients();
+
+setInterval(() => {
+
+    loadPatients();
+
+}, 5000);
+
+const user =
+    JSON.parse(
+        localStorage.getItem(
+            "queuecareUser"
+        )
+    );
+
+
+if (!user || user.role !== "reception") {
+
+    window.location.href =
+        "Login.html";
+
+}
+</script>
+
+</body>
+</html>
